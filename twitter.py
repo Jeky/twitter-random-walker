@@ -14,14 +14,39 @@ class Twitter:
 
 
     def getUser(self, userId):
+        return self.getJson(GET_USER_URL, 
+                            {'user_id': userId})
+
+
+    def getUserList(self, userIdList):
+        return self.getJson(BATCH_GET_USER_URL, 
+                            {'user_id' : ','.join(userIdList)})
+
+
+    def getFriendList(self, userId, cursor = -1):
+        return self.getJson(FRIEND_LIST_URL,
+                            {'user_id' : userId,
+                             'cursor'  : cursor,
+                             'count'   : 5000})
+
+
+    def getRemainingUserListRequestCount(self):
+        return int(self.getRemaining()['resources']['users']['/users/lookup']['remaining'])
+
+
+    def getRemaining(self):
+        return self.getJson(LIMITATION_URL, 
+                            {'resources' : 'users'})
+
+
+    def getJson(self, url, param):
         headers = {'Authorization' : 'Bearer ' + self.token}
 
-        r = requests.get(GET_USER_URL, params = {'user_id': userId}, headers = headers)
+        r = requests.get(url, params = param, headers = headers)
         if r.ok:
             return json.loads(r.text)
         else:
             r.raise_for_status()
-
 
 
     def auth(self):
@@ -40,10 +65,3 @@ class Twitter:
             self.token = json.loads(r.text)['access_token']
         else:
             r.raise_for_status()
-
-
-
-if __name__ == '__main__':
-    twitter = Twitter(APP_KEY, APP_SECRET)
-    user = twitter.getUser('813286')
-    print user
