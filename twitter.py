@@ -19,8 +19,15 @@ class Twitter:
 
 
     def getUserList(self, userIdList):
-        return self.getJson(BATCH_GET_USER_URL, 
-                            {'user_id' : ','.join(userIdList)})
+        # return self.getJson(BATCH_GET_USER_URL, 
+        #                     {'user_id' : ','.join(userIdList)})
+        headers = {'Authorization' : 'Bearer ' + self.token}
+
+        r = requests.post(BATCH_GET_USER_URL, data = {'user_id' : ','.join(userIdList)}, headers = headers)
+        if r.ok:
+            return json.loads(r.text)
+        else:
+            return []
 
 
     def getFriendList(self, userId, cursor = -1):
